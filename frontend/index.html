@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepShield — AI Deepfake Detector</title>
+  <meta name="description" content="AI-powered deepfake detection for images, videos, and audio using EfficientNet, TimeSformer, and wav2vec2 ensemble models." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Animated 3D background -->
+  <div class="bg-mesh">
+    <canvas id="heroScene" aria-hidden="true"></canvas>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">Deep<span class="logo-accent">Shield</span></span>
+        <span class="logo-badge">AI</span>
+      </div>
+      <nav class="nav">
+        <a href="#upload" class="nav-link active">Analyze</a>
+        <a href="#socialPanel" class="nav-link">Social</a>
+        <a href="#about"  class="nav-link">How It Works</a>
+        <a href="/docs"   class="nav-link" target="_blank">API</a>
+      </nav>
+      <div class="header-status">
+        <span class="status-dot"></span>
+        <span class="status-text">Model Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="upload">
+    <div class="hero-inner">
+      <div class="hero-depth" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="hero-badge">🔬 Multi-Modal AI Detection</div>
+      <h1 class="hero-title">
+        Detect <span class="gradient-text">Deepfakes</span><br/>
+        with Precision
+      </h1>
+      <p class="hero-subtitle">
+        EfficientNet-B4 + TimeSformer + wav2vec2 ensemble.
+        Analyze images, videos &amp; audio for manipulation in seconds.
+      </p>
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-inner">
+          <div class="upload-icon-wrap">
+            <div class="upload-icon">📁</div>
+            <div class="upload-pulse"></div>
+          </div>
+          <p class="upload-title">Drop media here or <span class="upload-browse" id="browseBtn">browse</span></p>
+          <p class="upload-hint">Images (JPG, PNG, WEBP) · Videos (MP4, MOV) · Audio (WAV, MP3)</p>
+          <p class="upload-limit">Max 500 MB</p>
+          <div class="upload-formats">
+            <span class="fmt-badge img">🖼 Image</span>
+            <span class="fmt-badge vid">🎬 Video</span>
+            <span class="fmt-badge aud">🎵 Audio</span>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*,video/*,audio/*" hidden />
+      </div>
+
+      <!-- URL Input -->
+      <div class="url-section">
+        <div class="url-divider"><span>or analyze from URL</span></div>
+        <div class="url-input-wrap">
+          <span class="url-prefix">🔗</span>
+          <select id="platformSelect" class="platform-select" aria-label="Social media platform">
+            <option value="auto">Auto</option>
+            <option value="instagram">Instagram</option>
+            <option value="x">X</option>
+            <option value="facebook">Facebook</option>
+            <option value="tiktok">TikTok</option>
+            <option value="youtube">YouTube</option>
+            <option value="linkedin">LinkedIn</option>
+          </select>
+          <input type="url" id="urlInput" class="url-input" placeholder="https://example.com/media.jpg" />
+          <button class="url-btn" id="urlBtn">Scan</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analysis Panel (hidden until scan) -->
+  <section class="analysis-section" id="analysisSection" style="display:none">
+    <div class="analysis-inner">
+
+      <!-- Media Preview -->
+      <div class="preview-card glass-card">
+        <div class="card-header">
+          <span class="card-icon">👁</span>
+          <span class="card-title">Media Preview</span>
+          <span class="media-type-badge" id="mediaTypeBadge">IMAGE</span>
+        </div>
+        <div class="preview-area" id="previewArea">
+          <img id="previewImg" style="display:none" alt="Analyzed media" />
+          <video id="previewVid" style="display:none" controls></video>
+          <audio id="previewAud" style="display:none" controls></audio>
+        </div>
+        <div class="preview-meta" id="previewMeta"></div>
+      </div>
+
+      <!-- Verdict Card -->
+      <div class="verdict-card glass-card" id="verdictCard">
+        <div class="scanning-overlay" id="scanningOverlay">
+          <div class="scan-line"></div>
+          <div class="scan-text">🔬 Analyzing...</div>
+        </div>
+
+        <div class="verdict-content" id="verdictContent" style="display:none">
+          <div class="verdict-icon" id="verdictIcon">❓</div>
+          <div class="verdict-label" id="verdictLabel">—</div>
+          <div class="verdict-sub" id="verdictSub">Awaiting analysis</div>
+
+          <!-- Circular Score Gauge -->
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 200 200">
+              <circle class="gauge-bg" cx="100" cy="100" r="80" />
+              <circle class="gauge-track" cx="100" cy="100" r="80" />
+              <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="80" />
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-score" id="gaugeScore">0%</div>
+              <div class="gauge-label">Fake Score</div>
+            </div>
+          </div>
+
+          <div class="confidence-row">
+            <span class="conf-label">Confidence</span>
+            <span class="conf-value" id="confValue">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Classification Model -->
+      <div class="ai-card glass-card">
+        <div class="card-header">
+          <span class="card-icon">🧠</span>
+          <span class="card-title">AI Classification Model</span>
+          <span class="model-badge" id="modelBadge">READY</span>
+        </div>
+        <div class="classification-body">
+          <div class="classification-label" id="classificationLabel">Awaiting media</div>
+          <div class="classification-sub" id="classificationSub">Classifier will label the content after analysis.</div>
+          <div class="classification-grid">
+            <div>
+              <span>Model</span>
+              <strong id="modelName">DeepShield Image Classifier</strong>
+            </div>
+            <div>
+              <span>Class confidence</span>
+              <strong id="modelConfidence">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Authenticity Score -->
+      <div class="authenticity-card glass-card">
+        <div class="card-header">
+          <span class="card-icon">🛡</span>
+          <span class="card-title">Content Authenticity Score</span>
+        </div>
+        <div class="auth-score-row">
+          <div class="auth-score" id="authScore">0%</div>
+          <div>
+            <div class="auth-label" id="authLabel">Not analyzed</div>
+            <div class="auth-copy" id="authCopy">Higher score means the media appears more authentic.</div>
+          </div>
+        </div>
+        <div class="auth-bar-wrap"><div class="auth-bar" id="authBar" style="width:0%"></div></div>
+        <div class="auth-factors" id="authFactors"></div>
+      </div>
+
+      <!-- Modality Breakdown -->
+      <div class="breakdown-card glass-card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">Detection Breakdown</span>
+        </div>
+        <div class="modality-list" id="modalityList">
+          <div class="modality-item">
+            <div class="mod-header">
+              <span class="mod-icon">🖼</span>
+              <span class="mod-name">Spatial / Image</span>
+              <span class="mod-score" id="imgScore">—</span>
+            </div>
+            <div class="mod-bar-wrap"><div class="mod-bar" id="imgBar" style="width:0%"></div></div>
+            <div class="mod-artifacts" id="imgArtifacts"></div>
+          </div>
+          <div class="modality-item">
+            <div class="mod-header">
+              <span class="mod-icon">🎬</span>
+              <span class="mod-name">Temporal / Video</span>
+              <span class="mod-score" id="vidScore">—</span>
+            </div>
+            <div class="mod-bar-wrap"><div class="mod-bar" id="vidBar" style="width:0%"></div></div>
+            <div class="mod-artifacts" id="vidArtifacts"></div>
+          </div>
+          <div class="modality-item">
+            <div class="mod-header">
+              <span class="mod-icon">🎵</span>
+              <span class="mod-name">Audio / Prosody</span>
+              <span class="mod-score" id="audScore">—</span>
+            </div>
+            <div class="mod-bar-wrap"><div class="mod-bar" id="audBar" style="width:0%"></div></div>
+            <div class="mod-artifacts" id="audArtifacts"></div>
+          </div>
+          <div class="modality-item">
+            <div class="mod-header">
+              <span class="mod-icon">📋</span>
+              <span class="mod-name">Metadata / EXIF</span>
+              <span class="mod-score" id="metaScore">—</span>
+            </div>
+            <div class="mod-bar-wrap"><div class="mod-bar" id="metaBar" style="width:0%"></div></div>
+            <div class="mod-artifacts" id="metaArtifacts"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Media Integration -->
+      <div class="social-card glass-card" id="socialPanel">
+        <div class="card-header">
+          <span class="card-icon">🌐</span>
+          <span class="card-title">Social Media Integration</span>
+          <span class="card-sub" id="socialSource">No source linked</span>
+        </div>
+        <div class="social-grid">
+          <div class="social-item">
+            <span>Detected platform</span>
+            <strong id="detectedPlatform">—</strong>
+          </div>
+          <div class="social-item">
+            <span>Share verdict</span>
+            <div class="share-actions">
+              <button class="share-btn" id="copyReportBtn" type="button">Copy</button>
+              <a class="share-btn" id="shareX" href="#" target="_blank" rel="noreferrer">X</a>
+              <a class="share-btn" id="shareLinkedIn" href="#" target="_blank" rel="noreferrer">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heatmap Card -->
+      <div class="heatmap-card glass-card" id="heatmapCard" style="display:none">
+        <div class="card-header">
+          <span class="card-icon">🔥</span>
+          <span class="card-title">Grad-CAM Heatmap</span>
+          <span class="card-sub">Regions that triggered detection</span>
+        </div>
+        <div class="heatmap-area" id="heatmapArea"></div>
+      </div>
+
+      <!-- Technical Details -->
+      <div class="tech-card glass-card">
+        <div class="card-header">
+          <span class="card-icon">⚙️</span>
+          <span class="card-title">Technical Details</span>
+          <button class="toggle-btn" id="techToggle">Show</button>
+        </div>
+        <div class="tech-details" id="techDetails" style="display:none">
+          <div class="tech-grid" id="techGrid"></div>
+        </div>
+      </div>
+
+      <!-- Reset button -->
+      <button class="reset-btn" id="resetBtn">🔄 Analyze Another File</button>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="about-section" id="about">
+    <div class="about-inner">
+      <h2 class="section-title">How <span class="gradient-text">DeepShield</span> Works</h2>
+      <div class="pipeline-grid">
+        <div class="pipeline-step">
+          <div class="step-num">01</div>
+          <div class="step-icon">🧬</div>
+          <h3>SRM + FFT Analysis</h3>
+          <p>Steganalysis Rich Model filters extract manipulation noise residuals invisible to the human eye. 2D-FFT detects GAN spectral fingerprints.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">02</div>
+          <div class="step-icon">🧠</div>
+          <h3>EfficientNet-B4 Backbone</h3>
+          <p>Spatial feature extraction via pre-trained EfficientNet-B4, fine-tuned on FaceForensics++ and DFDC datasets.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">03</div>
+          <div class="step-icon">⏱</div>
+          <h3>TimeSformer Temporal</h3>
+          <p>Divided Space-Time Attention transformer detects frame-to-frame flickering and lip-sync mismatches (Wav2Lip attacks).</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">04</div>
+          <div class="step-icon">🎙</div>
+          <h3>wav2vec2 Audio</h3>
+          <p>Fine-tuned wav2vec 2.0 + Mel spectrogram CNN detects voice cloning, TTS synthesis, and unnatural prosody patterns.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">05</div>
+          <div class="step-icon">🎯</div>
+          <h3>Ensemble Fusion</h3>
+          <p>GBM + MLP meta-learner fuses all modality signals with EXIF metadata for the final authenticity score.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">06</div>
+          <div class="step-icon">📊</div>
+          <h3>Grad-CAM Explanation</h3>
+          <p>Gradient-weighted Class Activation Maps highlight the exact image regions that triggered the deepfake verdict.</p>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-val">97%+</div>
+          <div class="stat-label">AUC-ROC on FF++</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">&lt;200ms</div>
+          <div class="stat-label">Image inference</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">&lt;5%</div>
+          <div class="stat-label">Equal Error Rate</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Modalities analyzed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>🛡️ DeepShield · AI-Powered Media Authenticity · Built with PyTorch, FastAPI &amp; ❤️</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: deepshield-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DEMO_MODE=true
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./checkpoints:/app/checkpoints
+      - ./data:/app/data
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: deepshield-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: deepshield-worker
+    command: celery -A backend.worker worker --loglevel=info --concurrency=2
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
