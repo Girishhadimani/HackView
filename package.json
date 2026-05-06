@@ -1,0 +1,12 @@
+{
+  "name": "deepshield-ui",
+  "version": "1.0.0",
+  "description": "DeepShield Deepfake Detector UI",
+  "scripts": {
+    "dev": "python -m http.server 8080 --directory frontend",
+    "build": "echo 'No build process needed for static HTML'",
+    "serve": "python -m http.server 8080 --directory frontend"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

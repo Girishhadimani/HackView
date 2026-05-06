@@ -1,0 +1,4 @@
+
+> deepshield-ui@1.0.0 dev
+> python -m http.server 8080 --directory frontend
+

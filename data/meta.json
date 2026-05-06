@@ -1,0 +1,17 @@
+{
+  "dataset": "Demo Synthetic",
+  "source": "Generated synthetic images for demo",
+  "total": 1000,
+  "real": {
+    "train": 350,
+    "val": 75,
+    "test": 75
+  },
+  "fake": {
+    "train": 350,
+    "val": 75,
+    "test": 75
+  },
+  "image_size": 128,
+  "note": "Synthetic demo dataset for training demonstration"
+}
